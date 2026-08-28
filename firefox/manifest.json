@@ -3,15 +3,27 @@
   "name": "Presend — Clean Photos",
   "version": "0.1.0",
   "description": "Right-click any image to strip hidden EXIF/GPS metadata and download a clean copy — entirely on your device, nothing uploaded.",
-  "permissions": ["contextMenus", "downloads"],
-  "host_permissions": ["<all_urls>"],
+  "permissions": [
+    "contextMenus",
+    "downloads"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
   "background": {
-    "scripts": ["background.js"]
+    "scripts": [
+      "background.js"
+    ]
   },
   "browser_specific_settings": {
     "gecko": {
       "id": "clean-photos@presend.pages.dev",
-      "strict_min_version": "121.0"
+      "strict_min_version": "121.0",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
     }
   },
   "icons": {
