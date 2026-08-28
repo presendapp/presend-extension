@@ -4,13 +4,23 @@
 // and re-export, exactly like the stripMetadata() logic on presend.pages.dev.
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.target !== 'offscreen' || message.action !== 'clean-image') {
-    return false; // not for us
+  if (message.target !== 'offscreen') return false;
+
+  if (message.action === 'clean-image') {
+    cleanImage(message.dataUrl, message.sourceType)
+      .then((result) => sendResponse({ success: true, ...result }))
+      .catch((err) => sendResponse({ success: false, error: String(err.message || err) }));
+    return true;
   }
-  cleanImage(message.dataUrl, message.sourceType)
-    .then((result) => sendResponse({ success: true, ...result }))
-    .catch((err) => sendResponse({ success: false, error: String(err.message || err) }));
-  return true; // keep the message channel open for the async response
+
+  if (message.action === 'clean-and-compress-image') {
+    cleanAndCompressImage(message.dataUrl, message.sourceType, message.quality)
+      .then((result) => sendResponse({ success: true, ...result }))
+      .catch((err) => sendResponse({ success: false, error: String(err.message || err) }));
+    return true;
+  }
+
+  return false; // not for us
 });
 
 function loadImage(dataUrl) {
@@ -43,6 +53,34 @@ async function cleanImage(dataUrl, sourceType) {
       reader.onerror = () => reject(reader.error);
       reader.readAsDataURL(blob);
     }, outputType, quality);
+  });
+
+  return { cleanedDataUrl, outputType };
+}
+
+
+// Same metadata-stripping pass as cleanImage(), then re-encodes at a given
+// quality (0-100, matching the convention used on presend.pages.dev).
+async function cleanAndCompressImage(dataUrl, sourceType, quality) {
+  const img = await loadImage(dataUrl);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = img.naturalWidth;
+  canvas.height = img.naturalHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0);
+
+  const outputType = sourceType === 'image/png' ? 'image/png' : 'image/jpeg';
+  const q = outputType === 'image/jpeg' ? (Number(quality) || 80) / 100 : undefined;
+
+  const cleanedDataUrl = await new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) { reject(new Error('Could not process this image.')); return; }
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(blob);
+    }, outputType, q);
   });
 
   return { cleanedDataUrl, outputType };

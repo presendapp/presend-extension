@@ -2,12 +2,18 @@
 // Handles the right-click context menu and orchestrates image cleaning
 // via an offscreen document (service workers have no DOM/canvas access).
 
-const MENU_ID = 'presend-clean-image';
+const MENU_CLEAN_ID = 'presend-clean-image';
+const MENU_CLEAN_COMPRESS_ID = 'presend-clean-compress-image';
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
-    id: MENU_ID,
+    id: MENU_CLEAN_ID,
     title: 'Clean with Presend (remove EXIF/GPS)',
+    contexts: ['image']
+  });
+  chrome.contextMenus.create({
+    id: MENU_CLEAN_COMPRESS_ID,
+    title: 'Clean & Compress with Presend',
     contexts: ['image']
   });
 });
@@ -31,7 +37,9 @@ async function ensureOffscreenDocument() {
 }
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-  if (info.menuItemId !== MENU_ID || !info.srcUrl) return;
+  const isClean = info.menuItemId === MENU_CLEAN_ID;
+  const isCleanCompress = info.menuItemId === MENU_CLEAN_COMPRESS_ID;
+  if ((!isClean && !isCleanCompress) || !info.srcUrl) return;
 
   try {
     await ensureOffscreenDocument();
@@ -44,18 +52,21 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     const blob = await response.blob();
     const dataUrl = await blobToDataUrl(blob);
 
+    const action = isCleanCompress ? 'clean-and-compress-image' : 'clean-image';
     const result = await chrome.runtime.sendMessage({
       target: 'offscreen',
-      action: 'clean-image',
+      action,
       dataUrl,
-      sourceType: blob.type
+      sourceType: blob.type,
+      quality: 80
     });
 
     if (!result || !result.success) {
       throw new Error(result && result.error ? result.error : 'Unknown error cleaning the image.');
     }
 
-    const filename = guessFilename(info.srcUrl, result.outputType);
+    const suffix = isCleanCompress ? '-clean-compressed' : '-clean';
+    const filename = guessFilename(info.srcUrl, result.outputType, suffix);
     await chrome.downloads.download({
       url: result.cleanedDataUrl,
       filename: 'presend-cleaned/' + filename,
@@ -81,7 +92,7 @@ function blobToDataUrl(blob) {
   });
 }
 
-function guessFilename(srcUrl, outputType) {
+function guessFilename(srcUrl, outputType, suffix) {
   let base = 'image';
   try {
     const u = new URL(srcUrl);
@@ -89,5 +100,5 @@ function guessFilename(srcUrl, outputType) {
     if (last) base = last.replace(/\.[^.]+$/, '');
   } catch (e) { /* keep default */ }
   const ext = outputType === 'image/png' ? 'png' : 'jpg';
-  return base + '-clean.' + ext;
+  return base + (suffix || '-clean') + '.' + ext;
 }
