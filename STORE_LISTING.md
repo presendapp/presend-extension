@@ -1,14 +1,16 @@
 # Chrome Web Store Listing
 
 ## Short description (max 132 characters)
-Right-click any photo to strip hidden EXIF/GPS data and download a clean copy. Nothing is uploaded — 100% on your device.
+Right-click any photo to strip EXIF/GPS data, optionally compress it too. Nothing uploaded — 100% on your device.
 
 ## Long description
 
 Every photo you take carries hidden metadata: GPS coordinates, camera model, the exact time it was taken. Presend — Clean Photos removes it in one click, without ever uploading your image anywhere.
 
 **How it works**
-Right-click any photo on any website, choose "Clean with Presend," and a cleaned copy downloads automatically — no GPS location, no camera info, no timestamps.
+Right-click any photo on any website. Two options:
+- **"Clean with Presend"** — strips GPS location, camera info, and timestamps, keeps full quality.
+- **"Clean & Compress with Presend"** — does the same, then also shrinks the file size. Useful before emailing or uploading a large photo.
 
 **100% private by design**
 The image is processed entirely on your device using your browser's own rendering engine. It is never sent to Presend's servers, or to any third party. There is nothing to upload, because nothing ever leaves your computer.
