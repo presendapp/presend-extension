@@ -15,6 +15,13 @@ Right-click any photo on any website, choose **"Clean with Presend (remove EXIF/
 
 Nothing is ever uploaded. The image is fetched by the extension itself (needed to read pixel data across origins) and processed locally — it never reaches any Presend server or third party.
 
+## Availability
+
+- **Direct download**: [latest release](https://github.com/presendapp/presend-extension/releases/latest) — works in any Chromium browser (Chrome, Edge, Opera, Brave, Vivaldi) via "Load unpacked" in developer mode.
+- **Firefox Add-ons**: submitted, pending review.
+- **Opera Add-ons**: submitted, pending review.
+- **Chrome Web Store / Microsoft Edge Add-ons**: not yet submitted.
+
 ## Development
 
 Load unpacked in Chrome:
