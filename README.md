@@ -13,7 +13,7 @@ Right-click any photo on any website, choose **"Clean with Presend (remove EXIF/
 - `background.js` — service worker that registers the context menu and orchestrates the cleaning flow.
 - `offscreen.html` / `offscreen.js` — an offscreen document (service workers have no DOM/canvas access) that does the actual work: redraw the image onto a blank `<canvas>` and re-export it. Redrawing strips all metadata by construction, since a canvas only ever holds raw pixel data.
 
-Nothing is ever uploaded. The image is fetched by the extension itself (needed to read pixel data across origins) and processed locally — it never reaches any Presend server or third party.
+The image is never uploaded. It is fetched by the extension itself (needed to read pixel data across origins) and processed locally — it never reaches any Presend server or third party.
 
 ## Availability
 
